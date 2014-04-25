@@ -12,16 +12,18 @@ It uses the management space to store the events.
 
 2. Then edit the bootstrap-management.sh script to add this:
 
-```
+	
 	if [ "$GSA_MODE" = "lus" ]; then
 		${WORKING_HOME_DIRECTORY}/events/bin/gsDeployEventsWar.sh
 	fi
-```
+	
 
 Right after:
 
 ```
+	
 	./cloudify.sh $START_COMMAND $START_COMMAND_ARGS
+	
 ```
 
 3. Once deployed, a http GET request on `http://management_ip:8081/events/test` should returns a  `is running` message.
