@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>fr.fastconnect.cloudify</groupId>
+	<artifactId>cloudify-custom-events</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>Cloudify Custom Events</name>
+	<description>A custom events management using the management space of Cloudify</description>
+
+	<modules>
+		<module>cloudify-events-assembly</module>
+		<module>cloudify-events-rest</module>
+		<module>cloudify-gs-deployer</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>org.openspaces</id>
+			<name>OpenSpaces</name>
+			<url>http://maven-repository.openspaces.org</url>
+		</repository>
+		<repository>
+			<id>org.cloudifysource</id>
+			<url>http://maven-repository.cloudifysource.org</url>
+		</repository>
+	</repositories>
+
+
+	<properties>
+		<java.version>1.6</java.version>
+
+		<!-- GigaSpaces -->
+		<cloudify.version>2.7.0-5996-RELEASE</cloudify.version>
+		<gigaspaces.version>9.7.0-10496-RELEASE</gigaspaces.version>
+
+		<!-- Spring Framework -->
+		<org.springframework.version>3.2.4.RELEASE</org.springframework.version>
+
+		<!-- Tests -->
+		<junit.version>4.11</junit.version>
+	</properties>
+
+	<dependencyManagement>
+
+		<dependencies>
+
+			<!-- GigaSpaces -->
+			<dependency>
+				<groupId>com.gigaspaces</groupId>
+				<artifactId>gs-runtime</artifactId>
+				<version>${gigaspaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.gigaspaces</groupId>
+				<artifactId>gs-openspaces</artifactId>
+				<version>${gigaspaces.version}</version>
+			</dependency>
+
+			<!-- Spring -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+
+			<!-- Tests -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${org.springframework.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
