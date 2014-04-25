@@ -14,7 +14,7 @@ set JAVACMD=java
 :endOfJavaHome
 
 if "%LUS_IP_ADDRESS%" == "" set LUS_IP_ADDRESS=localhost:4174
-echo Deploy on locator(s) %LUS_IP_ADDRESS%
+echo Deploying custom events on locator(s) %LUS_IP_ADDRESS%
 
 set HOME=%~dp0..
 set CLASSPATH="%HOME%\lib\*"

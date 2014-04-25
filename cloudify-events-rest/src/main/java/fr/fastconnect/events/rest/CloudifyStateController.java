@@ -35,9 +35,9 @@ public class CloudifyStateController {
     @ResponseBody
     public CloudifyEvent[] getEvents(
             @RequestParam(required = true) String application,
-            @RequestParam String service,
-            @RequestParam String instanceId,
-            @RequestParam Integer lastIndex) {
+            @RequestParam(required = false) String service,
+            @RequestParam(required = false) String instanceId,
+            @RequestParam(required = false) Integer lastIndex) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("applicationName='").append(application).append("'");

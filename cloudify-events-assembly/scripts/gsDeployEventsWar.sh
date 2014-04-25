@@ -13,7 +13,7 @@ if [ -z "${LUS_IP_ADDRESS}" ]; then
     # echo "The LUS_IP_ADDRESS environment variable is not set. Using localhost:4174."
   LUS_IP_ADDRESS="localhost:4174"
 fi
-echo Deploy on locator(s) $LUS_IP_ADDRESS
+echo "Deploying custom events on locator(s) $LUS_IP_ADDRESS"
 
 cd `dirname $0`
 HOME=$PWD/..
