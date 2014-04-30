@@ -31,6 +31,11 @@ public class CloudifyStateController {
         return "is running";
     }
 
+    // @PostConstruct
+    // public void afterPropertiesSet() {
+    // gigaSpace.getTypeManager().registerTypeDescriptor(CloudifyEvent.class);
+    // }
+
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET)
     @ResponseBody
     public CloudifyEvent[] getEvents(
@@ -66,7 +71,7 @@ public class CloudifyStateController {
             @RequestParam(required = true) String application,
             @RequestParam(required = true) String service,
             @RequestParam(required = true) String instanceId,
-            @RequestParam(required = true) LifecycleEvents event) {
+            @RequestParam(required = true) String event) {
         synchronized (MUTEX) {
             SQLQuery<CloudifyEvent> template = new SQLQuery<CloudifyEvent>(CloudifyEvent.class,
                     String.format("applicationName='%s' and serviceName='%s' and instanceId='%s' ORDER BY eventIndex DESC", application, service, instanceId));

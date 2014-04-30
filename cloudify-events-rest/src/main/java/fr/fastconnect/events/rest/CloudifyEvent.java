@@ -18,14 +18,14 @@ public class CloudifyEvent {
     private String serviceName;
     private String instanceId;
     private String deploymentId;
-    private LifecycleEvents event;
+    private String event;
 
     private Date dateTimestamp;
 
     public CloudifyEvent() {
     }
 
-    public CloudifyEvent(String applicationName, String serviceName, LifecycleEvents event) {
+    public CloudifyEvent(String applicationName, String serviceName, String event) {
         this.applicationName = applicationName;
         this.serviceName = serviceName;
         this.event = event;
@@ -81,11 +81,11 @@ public class CloudifyEvent {
         this.deploymentId = deploymentId;
     }
 
-    public LifecycleEvents getEvent() {
+    public String getEvent() {
         return event;
     }
 
-    public void setEvent(LifecycleEvents event) {
+    public void setEvent(String event) {
         this.event = event;
     }
 

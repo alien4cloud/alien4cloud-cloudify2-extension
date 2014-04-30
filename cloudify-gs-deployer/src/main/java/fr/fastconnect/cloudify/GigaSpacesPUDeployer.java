@@ -113,7 +113,14 @@ public class GigaSpacesPUDeployer {
                 Thread.sleep(1000L);
             }
 
-            GridServiceAgent agent = admin.getGridServiceAgents().getAgents()[0];
+            GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
+            GridServiceAgent agent = null;
+            for (GridServiceAgent gsa : agents) {
+                if (!gsa.getMachine().getGridServiceManagers().isEmpty()) {
+                    agent = gsa;
+                    break;
+                }
+            }
 
             GridServiceContainerOptions options = new GridServiceContainerOptions();
             options.vmInputArgument("-Xmx128m");
