@@ -2,6 +2,8 @@ package fr.fastconnect.events.rest;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +33,10 @@ public class CloudifyStateController {
         return "is running";
     }
 
-    // @PostConstruct
-    // public void afterPropertiesSet() {
-    // gigaSpace.getTypeManager().registerTypeDescriptor(CloudifyEvent.class);
-    // }
+    @PostConstruct
+    public void afterPropertiesSet() {
+        gigaSpace.getTypeManager().registerTypeDescriptor(CloudifyEvent.class);
+    }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET)
     @ResponseBody
