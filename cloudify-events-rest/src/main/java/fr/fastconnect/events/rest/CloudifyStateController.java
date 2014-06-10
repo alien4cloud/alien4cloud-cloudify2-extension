@@ -126,6 +126,19 @@ public class CloudifyStateController {
         return gigaSpace.readMultiple(template);
     }
 
+    @RequestMapping(value = "/deleteInstanceStates", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String deleteInstanceStates(@RequestParam(required = true) String application) {
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(String.format("Requesting getInstanceStates(application=%s)...", application));
+        }
+        NodeInstanceState template = new NodeInstanceState();
+        template.setTopologyId(application);
+        gigaSpace.clear(template);
+        return "ok";
+    }
+
     @RequestMapping(value = "/getLatestEvent", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
