@@ -4,7 +4,7 @@
 
 	<groupId>fr.fastconnect.cloudify</groupId>
 	<artifactId>cloudify-custom-events</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -53,6 +53,12 @@
 				<groupId>com.gigaspaces</groupId>
 				<artifactId>gs-runtime</artifactId>
 				<version>${gigaspaces.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>tools</artifactId>
+						<groupId>com.sun</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.gigaspaces</groupId>

@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
-public class CloudifyEvent {
+public abstract class AlienEventDescription {
 
     private String id;
 
@@ -18,17 +18,15 @@ public class CloudifyEvent {
     private String serviceName;
     private String instanceId;
     private String deploymentId;
-    private String event;
 
     private Date dateTimestamp;
 
-    public CloudifyEvent() {
+    public AlienEventDescription() {
     }
 
-    public CloudifyEvent(String applicationName, String serviceName, String event) {
+    public AlienEventDescription(String applicationName, String serviceName) {
         this.applicationName = applicationName;
         this.serviceName = serviceName;
-        this.event = event;
     }
 
     @SpaceRouting
@@ -79,14 +77,6 @@ public class CloudifyEvent {
 
     public void setDeploymentId(String deploymentId) {
         this.deploymentId = deploymentId;
-    }
-
-    public String getEvent() {
-        return event;
-    }
-
-    public void setEvent(String event) {
-        this.event = event;
     }
 
     public Date getDateTimestamp() {

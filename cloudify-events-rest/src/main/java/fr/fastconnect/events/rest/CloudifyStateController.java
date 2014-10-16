@@ -1,5 +1,6 @@
 package fr.fastconnect.events.rest;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,10 +8,12 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +31,8 @@ public class CloudifyStateController {
 
     private static final byte[] MUTEX = new byte[0];
 
+    private ObjectMapper serializer = new ObjectMapper();
+
     @Autowired
     private GigaSpace gigaSpace;
 
@@ -39,24 +44,25 @@ public class CloudifyStateController {
 
     @PostConstruct
     public void afterPropertiesSet() {
-        gigaSpace.getTypeManager().registerTypeDescriptor(CloudifyEvent.class);
+        gigaSpace.getTypeManager().registerTypeDescriptor(AlienEvent.class);
+        gigaSpace.getTypeManager().registerTypeDescriptor(BlockStorageEvent.class);
         gigaSpace.getTypeManager().registerTypeDescriptor(NodeInstanceState.class);
     }
 
     @RequestMapping(value = "/getEventsSince", method = RequestMethod.GET)
     @ResponseBody
-    public CloudifyEvent[] getEventsSince(@RequestParam(required = true) long dateAsLong, @RequestParam(required = true) int maxEvents) {
+    public AlienEvent[] getEventsSince(@RequestParam(required = true) long dateAsLong, @RequestParam(required = true) int maxEvents) {
         Date date = new Date(dateAsLong);
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(String.format("Requesting getEventsSince(date=%s, maxEvents=%s)...", date, maxEvents));
         }
-        SQLQuery<CloudifyEvent> template = new SQLQuery<CloudifyEvent>(CloudifyEvent.class, "dateTimestamp > ?", date);
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, "dateTimestamp > ?", date);
         return gigaSpace.readMultiple(template, maxEvents);
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET)
     @ResponseBody
-    public CloudifyEvent[] getEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
+    public AlienEvent[] getEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
             @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
 
         if (LOGGER.isLoggable(Level.FINEST)) {
@@ -79,9 +85,8 @@ public class CloudifyStateController {
         }
         sb.append(" ORDER BY dateTimestamp, eventIndex");
 
-        SQLQuery<CloudifyEvent> template = new SQLQuery<CloudifyEvent>(CloudifyEvent.class, sb.toString());
-        CloudifyEvent[] read = gigaSpace.readMultiple(template);
-        return read;
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, sb.toString());
+        return gigaSpace.readMultiple(template);
     }
 
     @RequestMapping(value = "/putEvent", method = RequestMethod.GET)
@@ -96,9 +101,9 @@ public class CloudifyStateController {
                         event));
             }
 
-            CloudifyEvent latestEvent = this.getLatestEvent(application, service, instanceId);
+            AlienEvent latestEvent = this.getLatestEvent(application, service, instanceId);
             int lastIndex = latestEvent == null ? 0 : latestEvent.getEventIndex();
-            CloudifyEvent entry = new CloudifyEvent(application, service, event);
+            AlienEvent entry = new AlienEvent(application, service, event);
             entry.setEventIndex(lastIndex + 1);
             // entry.setDeploymentId(deploymentId);
             entry.setInstanceId(instanceId);
@@ -112,6 +117,70 @@ public class CloudifyStateController {
             instanceState.setInstanceId(instanceId);
             gigaSpace.write(instanceState);
         }
+    }
+
+    @RequestMapping(value = "/postEvent", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void postEvent(@RequestParam(required = true) String application, @RequestParam(required = true) String service,
+            @RequestParam(required = true) String instanceId, @RequestParam(required = false) EventType eventType, @RequestBody(required = true) Object event) {
+        synchronized (MUTEX) {
+
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(String.format("Requesting postEvent(application=%s, service=%s, instanceId=%s, eventType=%s, event=%s)...", application, service, instanceId,
+                        eventType, event));
+            }
+            AlienEvent formatedEvent;
+            EventType type = eventType == null ? EventType.INSTANCE_STATE : eventType;
+            try {
+                formatedEvent = getFormatedEvent(application, service, instanceId, type, event);
+            } catch (IOException e) {
+                return;
+            }
+            if (formatedEvent == null) {
+                return;
+            }
+            gigaSpace.write(formatedEvent, DEFAULT_LEASE);
+
+            if (EventType.INSTANCE_STATE.equals(type)) {
+                NodeInstanceState instanceState = new NodeInstanceState();
+                instanceState.setTopologyId(application);
+                instanceState.setNodeTemplateId(service);
+                instanceState.setInstanceState(formatedEvent.getEvent());
+                instanceState.setInstanceId(instanceId);
+                gigaSpace.write(instanceState);
+            }
+        }
+    }
+
+    private AlienEvent getFormatedEvent(String applicationName, String serviceName, String instanceId, EventType eventType, Object event) throws IOException {
+        String eventSTring;
+        if (event instanceof String) {
+            eventSTring = (String) event;
+        } else {
+            eventSTring =  serializer.writeValueAsString(event);
+        }
+        AlienEvent finalEvent;
+        switch (eventType) {
+        case BLOCKSTORAGE:
+            finalEvent = serializer.readValue(eventSTring, BlockStorageEvent.class);
+            break;
+        case INSTANCE_STATE:
+            finalEvent = new AlienEvent();
+            finalEvent.setEvent(eventSTring);
+            break;
+        default:
+            return null;
+        }
+
+        AlienEvent latestEvent = this.getLatestEvent(applicationName, serviceName, instanceId);
+        int lastIndex = latestEvent == null ? 0 : latestEvent.getEventIndex();
+        finalEvent.setEventIndex(lastIndex + 1);
+        finalEvent.setApplicationName(applicationName);
+        finalEvent.setServiceName(serviceName);
+        finalEvent.setInstanceId(instanceId);
+        finalEvent.setDateTimestamp(new Date());
+        return finalEvent;
     }
 
     @RequestMapping(value = "/getInstanceStates", method = RequestMethod.GET)
@@ -142,16 +211,16 @@ public class CloudifyStateController {
     @RequestMapping(value = "/getLatestEvent", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public CloudifyEvent getLatestEvent(@RequestParam(required = true) String application, @RequestParam(required = true) String service,
+    public AlienEvent getLatestEvent(@RequestParam(required = true) String application, @RequestParam(required = true) String service,
             @RequestParam(required = true) String instanceId) {
 
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(String.format("Requesting getLatestEvent(application=%s, service=%s, instanceId=%s)...", application, service, instanceId));
         }
 
-        SQLQuery<CloudifyEvent> template = new SQLQuery<CloudifyEvent>(CloudifyEvent.class, String.format(
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, String.format(
                 "applicationName='%s' and serviceName='%s' and instanceId='%s' ORDER BY eventIndex DESC", application, service, instanceId));
-        CloudifyEvent[] readMultiple = gigaSpace.readMultiple(template, 1);
+        AlienEvent[] readMultiple = gigaSpace.readMultiple(template, 1);
 
         if (readMultiple != null && readMultiple.length > 0) {
             return readMultiple[0];
@@ -163,14 +232,14 @@ public class CloudifyStateController {
     @RequestMapping(value = "/getAllEvents", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public CloudifyEvent[] getAllEvents() {
+    public AlienEvent[] getAllEvents() {
 
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest("Requesting getAllEvents()...");
         }
 
-        SQLQuery<CloudifyEvent> template = new SQLQuery<CloudifyEvent>(CloudifyEvent.class, String.format("ORDER BY dateTimestamp, eventIndex"));
-        CloudifyEvent[] read = gigaSpace.readMultiple(template);
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, String.format("ORDER BY dateTimestamp, eventIndex"));
+        AlienEvent[] read = gigaSpace.readMultiple(template);
         return read;
     }
 }
