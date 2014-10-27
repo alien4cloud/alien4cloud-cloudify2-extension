@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>alien4cloud</groupId>
+		<artifactId>alien4cloud-cloudify-custom-events</artifactId>
+		<version>0.0.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>alien4cloud-cloudify-events-assembly</artifactId>
+
+	<packaging>pom</packaging>
+
+	<name>alien4cloud Cloudify Events Assembly</name>
+	<description>Provides a packaged archive to deploy the custom events Rest API in Cloudify</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<finalName>alien4cloud-cloudify-events-rest</finalName>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>alien4cloud</groupId>
+			<artifactId>alien4cloud-cloudify-events-rest</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>alien4cloud</groupId>
+			<artifactId>alien4cloud-cloudify-gs-deployer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+</project>

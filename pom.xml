@@ -2,22 +2,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>fr.fastconnect.cloudify</groupId>
-	<artifactId>cloudify-custom-events</artifactId>
+	<groupId>alien4cloud</groupId>
+	<artifactId>alien4cloud-cloudify-custom-events</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
-	<name>Cloudify Custom Events</name>
+	<name>Alien4cloud Cloudify Custom Events</name>
 	<description>A custom events management using the management space of Cloudify</description>
 
 	<modules>
-		<module>cloudify-events-assembly</module>
-		<module>cloudify-events-rest</module>
-		<module>cloudify-gs-deployer</module>
+		<module>alien4cloud-cloudify-events-model</module>
+		<module>alien4cloud-cloudify-events-assembly</module>
+		<module>alien4cloud-cloudify-events-rest</module>
+		<module>alien4cloud-cloudify-gs-deployer</module>
 	</modules>
 
 	<repositories>
+		<repository>
+			<id>repo.opensource.fastconnect.org</id>
+			<url>https://fastconnect.org/maven/content/repositories/opensource</url>
+		</repository>
 		<repository>
 			<id>org.openspaces</id>
 			<name>OpenSpaces</name>
@@ -25,12 +30,23 @@
 		</repository>
 		<repository>
 			<id>org.cloudifysource</id>
-			<url>http://maven-repository.cloudifysource.org</url>
+			<url>http://repository.cloudifysource.org</url>
 		</repository>
 	</repositories>
 
+	<distributionManagement>
+		<repository>
+			<id>repo.opensource.fastconnect.org</id>
+			<url>https://fastconnect.org/maven/content/repositories/opensource</url>
+		</repository>
+		<snapshotRepository>
+			<id>repo.opensource.snapshot.fastconnect.org</id>
+			<url>https://fastconnect.org/maven/content/repositories/opensource-snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
+		<jackson.version>2.3.1</jackson.version>
 		<java.version>1.6</java.version>
 
 		<!-- GigaSpaces -->
@@ -42,11 +58,25 @@
 
 		<!-- Tests -->
 		<junit.version>4.11</junit.version>
+
 	</properties>
 
 	<dependencyManagement>
 
 		<dependencies>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.3.2</version>
+			</dependency>
+
 
 			<!-- GigaSpaces -->
 			<dependency>
