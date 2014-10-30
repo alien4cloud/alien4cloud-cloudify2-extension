@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>alien4cloud</groupId>
-		<artifactId>alien4cloud-cloudify-custom-events</artifactId>
+		<artifactId>alien4cloud-cloudify2-extension</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>alien4cloud-cloudify-events-model</artifactId>
