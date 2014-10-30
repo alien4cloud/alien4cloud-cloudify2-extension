@@ -1,8 +1,8 @@
-# Cloudify Custom Events
+# Alien4Cloud Cloudify2 Extension
 
 ## Description
 
-Provides a REST API to handle lifecycle evens for Cloudify 2.x.
+Helpful extension for alien4cloud-cloudify2-provider
 
 It uses the management space to store the events.
 
