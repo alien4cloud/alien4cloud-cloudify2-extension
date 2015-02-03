@@ -11,7 +11,8 @@
 		<fileSet>
 			<directory>scripts</directory>
 			<outputDirectory>bin</outputDirectory>
-			<fileMode>755</fileMode>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
 		</fileSet>
 	</fileSets>
 	<dependencySets>
