@@ -8,7 +8,7 @@
 	</parent>
 	
 	<artifactId>alien4cloud-cloudify-gs-deployer</artifactId>
-
+  
 	<packaging>jar</packaging>
 
 	<name>Alien4cloud Cloudify GigaSpaces Deployer</name>

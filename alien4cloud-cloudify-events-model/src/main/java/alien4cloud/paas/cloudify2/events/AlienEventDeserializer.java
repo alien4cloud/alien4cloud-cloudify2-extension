@@ -22,8 +22,8 @@ public class AlienEventDeserializer extends StdDeserializer<AlienEvent> {
 
     public AlienEventDeserializer() {
         super(AlienEvent.class);
-        registry.put(EventType.INSTANCE_STATE_STR, AlienEvent.class);
-        registry.put(EventType.BLOCKSTORAGE_STR, BlockStorageEvent.class);
+        registry.put(EventType.INSTANCE_STATE, AlienEvent.class);
+        registry.put(EventType.BLOCKSTORAGE, BlockStorageEvent.class);
     }
 
     public void registerEvent(String type, Class<? extends AlienEvent> eventClass) {
@@ -35,7 +35,7 @@ public class AlienEventDeserializer extends StdDeserializer<AlienEvent> {
         ObjectMapper mapper = (ObjectMapper) jp.getCodec();
         ObjectNode root = mapper.readTree(jp);
         Class<? extends AlienEvent> eventClass = null;
-        String type = EventType.INSTANCE_STATE.toString();
+        String type = EventType.INSTANCE_STATE;
         if (root.hasNonNull(TYPE_FIELD)) {
             type = root.findValue(TYPE_FIELD).asText();
         }

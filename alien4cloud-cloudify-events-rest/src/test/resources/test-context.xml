@@ -15,6 +15,9 @@
 	-->
 	<bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
+    <!-- Enable support for @Notify annotation -->
+    <os-events:annotation-support />
+
 	<!--
 		A bean representing a space (an IJSpace implementation).
 		Note, we perform a lookup on the space since we are working against a remote space.
@@ -27,7 +30,7 @@
 	<os-core:giga-space id="gigaSpace" space="space" />
 
 	<context:annotation-config />
-	<context:component-scan base-package="alien4cloud.paas.cloudify2.events" />
+	<context:component-scan base-package="alien4cloud.paas.cloudify2" />
 	
 <!-- 	<bean class="alien4cloud.paas.cloudify2.events.rest.CloudifyStateController"></bean> -->
 </beans>
