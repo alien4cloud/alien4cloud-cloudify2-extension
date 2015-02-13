@@ -12,6 +12,10 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.cloudifysource.dsl.rest.request.InvokeCustomCommandRequest;
 import org.cloudifysource.dsl.rest.response.InvokeServiceCommandResponse;
 import org.cloudifysource.restclient.RestClient;
@@ -34,7 +38,7 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
 
     protected Set<String> handledOperations = new HashSet<String>();
 
-    private static Long DEFAULT_TIMEOUT_MILLIS = 60000L;
+    private static Long DEFAULT_TIMEOUT_MILLIS = 60000L * 5L;
 
     /**
      * initialize the handler. Ex, initialize the handled operations
@@ -48,7 +52,7 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
      * @param event
      * @return
      */
-    protected abstract String getTriggeredService(RelationshipOperationEvent event);
+    protected abstract RelationshipMember getTriggeredMember(RelationshipOperationEvent event);
 
     @Override
     public boolean canHandle(RelationshipOperationEvent event) {
@@ -59,7 +63,8 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
     public void eventHappened(RelationshipOperationEvent event) throws EventHandlingException {
         log.info("Handling event:" + event);
         RestClient restClient;
-        // waitFor(event.getApplicationName(), event.getSource(), event.getSourceService(), "started");
+        RelationshipMember triggeredNodePair = getTriggeredMember(event);
+        waitFor(event.getApplicationName(), triggeredNodePair.nodeId, triggeredNodePair.cdfyServiceName, "started", "available");
         try {
             restClient = restClientManager.getRestClient();
             InvokeCustomCommandRequest invokeRequest = new InvokeCustomCommandRequest();
@@ -67,23 +72,26 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             List<String> params = new ArrayList<String>();
             params.add(event.getInstanceId());
             invokeRequest.setParameters(params);
-            InvokeServiceCommandResponse invokeResponse = restClient
-                    .invokeServiceCommand(event.getApplicationName(), getTriggeredService(event), invokeRequest);
+            InvokeServiceCommandResponse invokeResponse = restClient.invokeServiceCommand(event.getApplicationName(), triggeredNodePair.cdfyServiceName,
+                    invokeRequest);
             Map<String, String> success = new HashMap<String, String>();
             Map<String, String> failures = new HashMap<String, String>();
             RestUtils.parseServiceInvokeResponse(success, failures, invokeResponse.getInvocationResultPerInstance());
-            log.info("Command result: \tSUCCESS: " + success + "\n\tFAILLURES: " + failures);
+            log.info("Command result: \n\tSUCCESS: " + success + "\n\tFAILLURES: " + failures);
             if (failures.isEmpty()) {
                 event.setSuccess(true);
             } else {
                 log.warning("Errors when handling event " + event);
                 log.warning("Errors on some instances when executing operation <" + event.getCommandName() + ">: " + failures);
+                event.setSuccess(false);
             }
         } catch (RestClientException e) {
+            event.setSuccess(false);
             String msg = "Fail to handle event " + event + ". \n" + e.getMessageFormattedText();
             log.severe(msg);
             throw new EventHandlingException(msg, e);
         } catch (IOException e) {
+            event.setSuccess(false);
             String msg = "Fail to handle event " + event;
             log.severe(msg);
             throw new EventHandlingException(msg, e);
@@ -99,36 +107,50 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
      * @param sourceService
      * @param state
      */
-    protected void waitFor(String application, String source, String sourceService, String state) {
+    protected void waitFor(String application, String source, String sourceService, String... states) {
         NodeInstanceState template = new NodeInstanceState();
         template.setTopologyId(application);
         template.setNodeTemplateId(source);
         Long timeout = System.currentTimeMillis() + DEFAULT_TIMEOUT_MILLIS;
         boolean continueToCheck = true;
-        log.info("Checking for node <" + source + "> state. Expects <" + state + ">.");
+        log.info("Checking for node <" + source + "> state. Expects one of <" + ArrayUtils.toString(states) + ">.");
         while (System.currentTimeMillis() < timeout && continueToCheck) {
             NodeInstanceState[] instanceStates = gigaSpace.readMultiple(template);
-            for (NodeInstanceState instanceState : instanceStates) {
-                if (!instanceState.getInstanceState().equalsIgnoreCase(state)) {
-                    log.info("Waiting 1000millis for node <" + source + ">  to reach state <" + state + ">...");
-                    try {
-                        Thread.sleep(1000L);
-                    } catch (InterruptedException e) {
-                        log.warning("Interrupted sleep");
+            if (instanceStates != null) {
+                for (NodeInstanceState instanceState : instanceStates) {
+                    if (!ArrayUtils.contains(states, instanceState.getInstanceState())) {
+                        break;
                     }
-                    break;
+                    continueToCheck = false;
                 }
-                continueToCheck = false;
+            }
+
+            if (continueToCheck) {
+                log.info("Waiting 1000millis for node <" + source + ">  to reach one of the states <" + ArrayUtils.toString(states) + ">...");
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    log.warning("Interrupted sleep");
+                }
             }
         }
 
         if (continueToCheck) {
-            throw new EventHandlingException("Fail to handle event. <" + source + "> node fails to reach state <" + state + "> in time.");
+            String msg = "Fail to handle event. <" + source + "> node fails to reach one of the states <" + ArrayUtils.toString(states) + "> in time.";
+            log.severe(msg);
+            throw new EventHandlingException(msg);
         }
     }
 
     private Logger getLogger() {
         return Logger.getLogger(this.getClass().getName());
     };
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    protected class RelationshipMember {
+        String nodeId;
+        String cdfyServiceName;
+    }
 
 }

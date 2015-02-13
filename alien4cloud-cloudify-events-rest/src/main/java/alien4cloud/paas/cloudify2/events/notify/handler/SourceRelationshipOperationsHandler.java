@@ -14,8 +14,7 @@ public class SourceRelationshipOperationsHandler extends AbstractRelationshipOpe
     }
 
     @Override
-    protected String getTriggeredService(RelationshipOperationEvent event) {
-        return event.getTargetService();
+    protected RelationshipMember getTriggeredMember(RelationshipOperationEvent event) {
+        return new RelationshipMember(event.getTarget(), event.getTargetService());
     }
-
 }

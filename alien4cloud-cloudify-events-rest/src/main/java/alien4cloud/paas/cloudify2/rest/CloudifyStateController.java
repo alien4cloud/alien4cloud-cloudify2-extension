@@ -172,4 +172,33 @@ public class CloudifyStateController {
         RelationshipOperationEvent[] read = gigaSpace.readMultiple(template);
         return read;
     }
+
+    @RequestMapping(value = "/getRelEvents", method = RequestMethod.GET)
+    @ResponseBody
+    public RelationshipOperationEvent[] getRelEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
+            @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
+
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(String.format("Requesting getEvents(application=%s, service=%s, instanceId=%s, lastIndex=%s)...", application, service, instanceId,
+                    lastIndex));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("applicationName='").append(application).append("'");
+        if (StringUtils.isNotEmpty(service)) {
+            sb.append(" and serviceName='").append(service).append("'");
+        }
+
+        if (StringUtils.isNotEmpty(instanceId)) {
+            sb.append(" and instanceId='").append(instanceId).append("'");
+        }
+
+        if (lastIndex != null) {
+            sb.append(" and eventIndex >= ").append(lastIndex == null ? 0 : lastIndex);
+        }
+        sb.append(" ORDER BY dateTimestamp, eventIndex");
+
+        SQLQuery<RelationshipOperationEvent> template = new SQLQuery<RelationshipOperationEvent>(RelationshipOperationEvent.class, sb.toString());
+        return gigaSpace.readMultiple(template);
+    }
 }

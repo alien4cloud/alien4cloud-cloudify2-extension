@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 
-import org.openspaces.core.GigaSpace;
 import org.openspaces.events.EventDriven;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
@@ -23,11 +22,9 @@ public class RelationshipOperationNotifyContainer {
     @SuppressWarnings("rawtypes")
     private Collection<IEventHandler> handlers;
 
-    @Resource
-    private GigaSpace gigaSpace;
-
     @EventTemplate
-    RelationshipOperationEvent template() {
+    RelationshipOperationEvent newRelationshipOperationTemplate() {
+        log.info("Register template for relationship event...");
         RelationshipOperationEvent template = new RelationshipOperationEvent();
         template.setExecuted(false);
         return template;
@@ -35,7 +32,7 @@ public class RelationshipOperationNotifyContainer {
 
     @SpaceDataEvent
     @SuppressWarnings("rawtypes")
-    public void eventListener(RelationshipOperationEvent event) {
+    public RelationshipOperationEvent eventListener(RelationshipOperationEvent event) {
         log.info("\t Got event: " + event.toString());
         for (IEventHandler handler : handlers) {
             if (handler.canHandle(event)) {
@@ -44,11 +41,7 @@ public class RelationshipOperationNotifyContainer {
             }
         }
         event.setExecuted(true);
-        gigaSpace.write(event);
-        try {
-            Thread.sleep(10L);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+
+        return event;
     }
 }
