@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>alien4cloud</groupId>
 		<artifactId>alien4cloud-cloudify2-extension</artifactId>
-		<version>0.0.2</version>
+		<version>0.0.3</version>
 	</parent>
 	
 	<artifactId>alien4cloud-cloudify-gs-deployer</artifactId>
-
+  
 	<packaging>jar</packaging>
 
 	<name>Alien4cloud Cloudify GigaSpaces Deployer</name>

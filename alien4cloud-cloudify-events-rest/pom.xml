@@ -1,64 +1,79 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>alien4cloud</groupId>
-		<artifactId>alien4cloud-cloudify2-extension</artifactId>
-		<version>0.0.2</version>
-	</parent>
+    <parent>
+        <groupId>alien4cloud</groupId>
+        <artifactId>alien4cloud-cloudify2-extension</artifactId>
+        <version>0.0.3</version>
+    </parent>
 
-	<artifactId>alien4cloud-cloudify-events-rest</artifactId>
+    <artifactId>alien4cloud-cloudify-events-rest</artifactId>
 
-	<packaging>war</packaging>
+    <packaging>war</packaging>
 
-	<name>Alien4cloud Cloudify Events Rest API</name>
-	<description>Utility to handle events in Cloudify using GigaSpaces</description>
+    <name>Alien4cloud Cloudify Events Rest API</name>
+    <description>Utility to handle events in Cloudify using GigaSpaces</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>alien4cloud</groupId>
-			<artifactId>alien4cloud-cloudify-events-model</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<!-- GigaSpaces -->
-		<dependency>
-			<groupId>com.gigaspaces</groupId>
-			<artifactId>gs-openspaces</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>alien4cloud</groupId>
+            <artifactId>alien4cloud-cloudify-events-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        <!-- GigaSpaces -->
+        <dependency>
+            <groupId>com.gigaspaces</groupId>
+            <artifactId>gs-openspaces</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<!-- Spring -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <!-- cloudify -->
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>dsl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>rest-client</artifactId>
+        </dependency>
 
-		<!-- Tests -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
