@@ -103,10 +103,22 @@ public class CloudifyStateController {
     @ResponseBody
     public String deleteInstanceStates(@RequestParam(required = true) String application) {
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting getInstanceStates(application=%s)...", application));
+            LOGGER.finest(String.format("Requesting deleteInstanceStates(application=%s)...", application));
         }
         NodeInstanceState template = new NodeInstanceState();
         template.setTopologyId(application);
+        gigaSpace.clear(template);
+        return "ok";
+    }
+
+    @RequestMapping(value = "/deleteAllInstanceStates", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String deleteAllInstanceStates() {
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(String.format("Deleteting All InstanceStates..."));
+        }
+        NodeInstanceState template = new NodeInstanceState();
         gigaSpace.clear(template);
         return "ok";
     }
