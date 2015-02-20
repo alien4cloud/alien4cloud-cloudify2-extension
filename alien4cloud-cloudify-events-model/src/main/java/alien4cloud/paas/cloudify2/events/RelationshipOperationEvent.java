@@ -17,4 +17,8 @@ public class RelationshipOperationEvent extends AlienEventDescription {
     private String commandName;
     private Boolean executed;
     private Boolean success;
+
+    public String resume() {
+        return relationshipId.concat(".").concat(event).concat("(").concat(serviceName + "[" + instanceId + "]").concat(")");
+    }
 }

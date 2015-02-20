@@ -33,7 +33,7 @@ public class RelationshipOperationNotifyContainer {
     @SpaceDataEvent
     @SuppressWarnings("rawtypes")
     public RelationshipOperationEvent eventListener(RelationshipOperationEvent event) {
-        log.info("\t Got event: " + event.toString());
+        log.info("Got event: " + event.resume() + "\n\t full event:" + event);
         for (IEventHandler handler : handlers) {
             if (handler.canHandle(event)) {
                 log.info("Handler found. delegating...");

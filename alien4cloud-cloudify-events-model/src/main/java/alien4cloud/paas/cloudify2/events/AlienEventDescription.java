@@ -18,17 +18,17 @@ public abstract class AlienEventDescription {
     private String id;
 
     @Getter
-    private Integer eventIndex;
+    protected Integer eventIndex;
     @Getter
-    private String applicationName;
+    protected String applicationName;
     @Getter
-    private String serviceName;
+    protected String serviceName;
     @Getter
-    private String instanceId;
+    protected String instanceId;
     @Getter
-    private String deploymentId;
+    protected String deploymentId;
     @Getter
-    private Date dateTimestamp;
+    protected Date dateTimestamp;
 
     @SpaceRouting
     @SpaceId(autoGenerate = true)

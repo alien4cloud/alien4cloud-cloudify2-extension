@@ -190,10 +190,8 @@ public class CloudifyStateController {
     public RelationshipOperationEvent[] getRelEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
             @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
 
-        if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting getEvents(application=%s, service=%s, instanceId=%s, lastIndex=%s)...", application, service, instanceId,
-                    lastIndex));
-        }
+        LOGGER.info(String.format("Requesting getEvents(application=%s, service=%s, instanceId=%s, lastIndex=%s)...", application, service, instanceId,
+                lastIndex));
 
         StringBuilder sb = new StringBuilder();
         sb.append("applicationName='").append(application).append("'");

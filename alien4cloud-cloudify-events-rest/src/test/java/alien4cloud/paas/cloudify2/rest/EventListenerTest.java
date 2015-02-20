@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import alien4cloud.paas.cloudify2.events.AlienEvent;
 import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
-import alien4cloud.paas.cloudify2.rest.CloudifyStateController;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:test-context.xml")
@@ -77,7 +76,7 @@ public class EventListenerTest {
 
         for (RelationshipOperationEvent events : allEvents) {
             if (events.getEvent().equals("add_source") || events.getEvent().equals("add_target")) {
-                Assert.assertTrue(events.isExecuted());
+                Assert.assertTrue(events.getExecuted());
             }
         }
     }
