@@ -1,4 +1,4 @@
-package alien4cloud.paas.cloudify2.events.notify.handler;
+package alien4cloud.paas.cloudify2.events.polling.handler;
 
 import java.util.Map;
 

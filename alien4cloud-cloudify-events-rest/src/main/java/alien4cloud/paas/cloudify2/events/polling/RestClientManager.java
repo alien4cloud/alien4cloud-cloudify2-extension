@@ -1,4 +1,4 @@
-package alien4cloud.paas.cloudify2.events.notify;
+package alien4cloud.paas.cloudify2.events.polling;
 
 import java.io.IOException;
 import java.net.URL;

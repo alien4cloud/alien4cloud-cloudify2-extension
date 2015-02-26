@@ -1,4 +1,4 @@
-package alien4cloud.paas.cloudify2.events.notify.handler;
+package alien4cloud.paas.cloudify2.events.polling.handler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import org.openspaces.core.GigaSpace;
 import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
 import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
 import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
-import alien4cloud.paas.cloudify2.events.notify.RestClientManager;
+import alien4cloud.paas.cloudify2.events.polling.RestClientManager;
 
 public abstract class AbstractRelationshipOperationHandler implements IEventHandler<RelationshipOperationEvent> {
 
@@ -51,8 +51,12 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             // check if the condition to trigger the event
             if (!isConditionMetToProcessEvent(event, triggeredMember)) {
                 log.warning("Condition not met to trigger event " + event.resume() + ". So we do nothing...");
+                event.setExecuted(false);
                 return;
             }
+
+            // mark the event as executed
+            event.setExecuted(true);
             InvokeCustomCommandRequest invokeRequest = new InvokeCustomCommandRequest();
             invokeRequest.setCommandName(event.getCommandName());
             List<String> params = new ArrayList<String>();
@@ -65,17 +69,15 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             RestUtils.parseServiceInvokeResponse(success, failures, invokeResponse.getInvocationResultPerInstance());
             log.info("Command result: \n\tSUCCESS: " + success + "\n\tFAILLURES: " + failures);
             if (failures.isEmpty()) {
-                event.setSuccess(true);
+                event.setSucceeded(true);
             } else {
                 log.warning("Errors when handling event " + event);
                 log.warning("Errors on some instances when executing operation <" + event.getCommandName() + ">: " + failures);
-                event.setSuccess(false);
+                event.setSucceeded(false);
             }
         } catch (RestClientException e) {
-            event.setSuccess(false);
-            String msg = "Fail to handle event " + event + ". \n" + e.getMessageFormattedText();
-            log.severe(msg);
-            throw new EventHandlingException(msg, e);
+            event.setSucceeded(false);
+            log.severe("Fail to handle event " + event + ". \t" + e.getMessageFormattedText());
         }
 
     }

@@ -17,6 +17,8 @@ public abstract class AlienEventDescription {
 
     private String id;
 
+    private Integer routing = 1;
+    
     @Getter
     protected Integer eventIndex;
     @Getter
@@ -31,6 +33,10 @@ public abstract class AlienEventDescription {
     protected Date dateTimestamp;
 
     @SpaceRouting
+    public Integer getRouting() {
+        return routing;
+    }
+    
     @SpaceId(autoGenerate = true)
     private String getId() {
         return id;

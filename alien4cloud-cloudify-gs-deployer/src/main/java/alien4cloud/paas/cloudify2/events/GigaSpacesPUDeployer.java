@@ -1,6 +1,10 @@
 package alien4cloud.paas.cloudify2.events;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -36,8 +40,7 @@ public class GigaSpacesPUDeployer {
         COMMAND_LINE_OPTIONS.addOption(PU_NAME_OPTION, true, "Path to the process unit to deploy");
     }
 
-    public static void main(String[] args) throws InterruptedException {
-
+    public static void main(String[] args) throws InterruptedException, IOException {
         String name = null;
         String locators = null;
         File processingUnit = null;
@@ -87,6 +90,11 @@ public class GigaSpacesPUDeployer {
         System.exit(1);
     }
 
+    private static void quitWithWarning(String message) {
+        System.out.println("WARNING: \t " + message);
+        System.exit(0);
+    }
+
     private static void quitWithError(Exception e) {
         quitWithError("Exception happened : [" + e.getMessage() + "], see log for more details");
     }
@@ -96,7 +104,7 @@ public class GigaSpacesPUDeployer {
         formatter.printHelp("gsDeploy [-h] [-locators {host:port,host:port,..}] [-pu path_to_the_pu_file]", COMMAND_LINE_OPTIONS);
     }
 
-    private static void deploy(String name, String locators, File processingUnit) throws InterruptedException {
+    private static void deploy(String name, String locators, File processingUnit) throws InterruptedException, IOException {
         AdminFactory adminFactory = new AdminFactory();
         adminFactory.useGsLogging(false);
         adminFactory.addLocators(locators);
@@ -114,32 +122,79 @@ public class GigaSpacesPUDeployer {
             }
 
             GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
-            GridServiceAgent agent = null;
             for (GridServiceAgent gsa : agents) {
                 if (!gsa.getMachine().getGridServiceManagers().isEmpty()) {
-                    agent = gsa;
-                    break;
+                    startEventGSC(gsa);
                 }
             }
 
+            if (isDeployed(admin, name)) {
+                System.out.println("WARNING: \t PU " + name + " already deployed. Skipping...");
+                return;
+            }
+
+            ProcessingUnitDeployment deployment = new ProcessingUnitDeployment(processingUnit);
+            deployment.name(name);
+            deployment.setContextProperty(CONTEXT_PROPERTY_APPLICATION_NAME, "management");
+            deployment.addZone(DEFAULT_ZONE);
+
+            GridServiceManager electedManager = admin.getGridServiceManagers().waitForAtLeastOne();
+            if (electedManager == null) {
+                System.out.println("ERROR: \t Failed to find an available GSM to deploy.");
+                return;
+            }
+            electedManager.deploy(deployment);
+        } finally {
+            if (admin != null) {
+                admin.close();
+            }
+        }
+    }
+
+    private static void startEventGSC(GridServiceAgent agent) throws IOException {
+        if (isLocalAgent(agent.getMachine().getHostAddress())) {
+            System.out.println("Start a GSC for events on <" + agent.getMachine().getHostAddress() + ">");
             GridServiceContainerOptions options = new GridServiceContainerOptions();
             options.vmInputArgument("-Xmx128m");
             options.vmInputArgument("-Xms128m");
             options.vmInputArgument("-Dcom.gs.zones=" + DEFAULT_ZONE);
             options.vmInputArgument("-Dcom.gs.transport_protocol.lrmi.bind-port=7010-7110");
             agent.startGridService(options);
+        }
+    }
 
-            ProcessingUnitDeployment deployment = new ProcessingUnitDeployment(processingUnit);
-            deployment.name(name);
-            deployment.setContextProperty(CONTEXT_PROPERTY_APPLICATION_NAME, "management");
-            deployment.addZone(DEFAULT_ZONE);
-            admin.getGridServiceManagers().getManagers()[0].deploy(deployment);
-
-        } finally {
-            if (admin != null) {
-                admin.close();
+    private static boolean isLocalAgent(String agentIp) throws IOException {
+        Enumeration e = NetworkInterface.getNetworkInterfaces();
+        while (e.hasMoreElements()) {
+            NetworkInterface n = (NetworkInterface) e.nextElement();
+            Enumeration ee = n.getInetAddresses();
+            while (ee.hasMoreElements()) {
+                InetAddress i = (InetAddress) ee.nextElement();
+                System.out.println("is agent <" + agentIp + "> on <" + i.getHostAddress() + ">");
+                if (i.getHostAddress().equals(agentIp)) {
+                    System.out.println("YES");
+                    return true;
+                }
             }
         }
+        return false;
+    }
+
+    /**
+     * Check if the given pu is deployed on an available GSM.
+     *
+     * @param admin
+     * @param name
+     * @return The first manager on which the PU is not yet deployed
+     */
+    private static boolean isDeployed(Admin admin, String name) {
+        GridServiceManager[] gsms = admin.getGridServiceManagers().getManagers();
+        for (GridServiceManager manager : gsms) {
+            if (manager.isDeployed(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean checkGSMAvailability(Admin admin) {

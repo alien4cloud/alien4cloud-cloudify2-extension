@@ -1,4 +1,4 @@
-package alien4cloud.paas.cloudify2.events.notify;
+package alien4cloud.paas.cloudify2.events.polling;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -8,25 +8,36 @@ import javax.annotation.Resource;
 import org.openspaces.events.EventDriven;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
-import org.openspaces.events.notify.Notify;
+import org.openspaces.events.polling.Polling;
+import org.openspaces.events.polling.ReceiveHandler;
+import org.openspaces.events.polling.receive.ReceiveOperationHandler;
+import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 
 import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
-import alien4cloud.paas.cloudify2.events.notify.handler.IEventHandler;
+import alien4cloud.paas.cloudify2.events.polling.handler.IEventHandler;
 
 @EventDriven
-@Notify
+@Polling(concurrentConsumers = 2)
 @SuppressWarnings("unchecked")
-public class RelationshipOperationNotifyContainer {
-    private static final Logger log = Logger.getLogger(RelationshipOperationNotifyContainer.class.getName());
+public class RelationshipOperationPollingContainer {
+    private static final Logger log = Logger.getLogger(RelationshipOperationPollingContainer.class.getName());
     @Resource
     @SuppressWarnings("rawtypes")
     private Collection<IEventHandler> handlers;
+
+    @ReceiveHandler
+    ReceiveOperationHandler receiveHandler() {
+        SingleTakeReceiveOperationHandler receiveHandler = new SingleTakeReceiveOperationHandler();
+        receiveHandler.setNonBlocking(true);
+        receiveHandler.setNonBlockingFactor(60);
+        return receiveHandler;
+    }
 
     @EventTemplate
     RelationshipOperationEvent newRelationshipOperationTemplate() {
         log.info("Register template for relationship event...");
         RelationshipOperationEvent template = new RelationshipOperationEvent();
-        template.setExecuted(false);
+        template.setProcessed(false);
         return template;
     }
 
@@ -40,7 +51,7 @@ public class RelationshipOperationNotifyContainer {
                 handler.eventHappened(event);
             }
         }
-        event.setExecuted(true);
+        event.setProcessed(true);
 
         return event;
     }

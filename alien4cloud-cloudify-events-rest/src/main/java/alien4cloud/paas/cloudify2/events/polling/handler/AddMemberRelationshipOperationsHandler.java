@@ -1,4 +1,4 @@
-package alien4cloud.paas.cloudify2.events.notify.handler;
+package alien4cloud.paas.cloudify2.events.polling.handler;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
@@ -30,11 +30,7 @@ public class AddMemberRelationshipOperationsHandler extends AbstractRelationship
     @Override
     protected boolean isConditionMetToProcessEvent(RelationshipOperationEvent event, RelationshipMember triggeredMember) {
         // wait for the triggered node to be at least started
-        boolean conditionMet = waitFor(event.getApplicationName(), triggeredMember.nodeId, triggeredMember.cdfyServiceName, "started", "available");
-        if (!conditionMet) {
-            event.setSuccess(false);
-        }
-        return conditionMet;
+        return waitFor(event.getApplicationName(), triggeredMember.nodeId, triggeredMember.cdfyServiceName, "started", "available");
     }
 
     /**

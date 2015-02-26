@@ -41,12 +41,14 @@ public class EventListenerTest {
 
         for (String event : events) {
             RelationshipOperationEvent entry = new RelationshipOperationEvent();
+            entry.setRelationshipId("rel");
             entry.setApplicationName(APPLI_NAME);
             entry.setEvent(event);
             entry.setServiceName(SERVICE_NAME);
             entry.setInstanceId(INSTANCE_ID);
             entry.setEventIndex(eventIndex++);
             entry.setDateTimestamp(new Date());
+            entry.setProcessed(false);
             gigaSpace.write(entry);
             try {
                 Thread.sleep(10L);
