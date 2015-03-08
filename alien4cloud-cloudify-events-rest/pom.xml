@@ -4,7 +4,7 @@
     <parent>
         <groupId>alien4cloud</groupId>
         <artifactId>alien4cloud-cloudify2-extension</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>alien4cloud-cloudify-events-rest</artifactId>
