@@ -1,6 +1,6 @@
 package alien4cloud.paas.cloudify2.events.Execption;
 
-public class EventHandlingException extends RuntimeException {
+public class EventHandlingException extends RestEventException {
     /**
      *
      */

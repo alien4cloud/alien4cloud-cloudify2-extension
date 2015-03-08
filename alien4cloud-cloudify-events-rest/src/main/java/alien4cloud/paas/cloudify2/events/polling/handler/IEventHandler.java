@@ -1,7 +1,7 @@
-package alien4cloud.paas.cloudify2.events.notify.handler;
+package alien4cloud.paas.cloudify2.events.polling.handler;
 
 import alien4cloud.paas.cloudify2.events.AlienEventDescription;
-import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
+import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
 
 /**
  * Interface implemented by all event handlers
@@ -23,5 +23,5 @@ public interface IEventHandler<T extends AlienEventDescription> {
      *
      * @param event the event to be handled
      */
-    void eventHappened(T event) throws EventHandlingException;
+    void eventHappened(T event) throws RestEventException;
 }
