@@ -61,6 +61,7 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             invokeRequest.setCommandName(event.getCommandName());
             List<String> params = new ArrayList<String>();
             params.add(event.getInstanceId());
+            params.add(event.getIpAddress());
             invokeRequest.setParameters(params);
             InvokeServiceCommandResponse invokeResponse = restClient.invokeServiceCommand(event.getApplicationName(), triggeredMember.cdfyServiceName,
                     invokeRequest);
