@@ -13,7 +13,7 @@
     <modules>
         <module>alien4cloud-cloudify-events-model</module>
         <module>alien4cloud-cloudify-events-assembly</module>
-        <module>alien4cloud-cloudify-events-rest</module>
+        <module>alien4cloud-cloudify-events</module>
         <module>alien4cloud-cloudify-gs-deployer</module>
     </modules>
 

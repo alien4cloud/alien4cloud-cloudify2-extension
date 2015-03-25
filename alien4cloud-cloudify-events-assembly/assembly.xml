@@ -18,7 +18,7 @@
 	<dependencySets>
 		<dependencySet>
 			<includes>
-				<include>*:alien4cloud-cloudify-events-rest:war</include>
+				<include>*:alien4cloud-cloudify-events:war</include>
 			</includes>
 			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
 			<outputDirectory>/deploy</outputDirectory>

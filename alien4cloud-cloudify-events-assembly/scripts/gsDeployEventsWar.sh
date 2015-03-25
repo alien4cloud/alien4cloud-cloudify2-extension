@@ -20,6 +20,6 @@ HOME=$PWD/..
 cd $OLDPWD
 
 CLASSPATH="$HOME"/lib/*
-ARGS="-name events -locators $LUS_IP_ADDRESS -pu $HOME/deploy/alien4cloud-cloudify-events-rest.war"
+ARGS="-name events -locators $LUS_IP_ADDRESS -pu $HOME/deploy/alien4cloud-cloudify-events.war"
 
 $JAVACMD -cp "$CLASSPATH" alien4cloud.paas.cloudify2.events.GigaSpacesPUDeployer $ARGS

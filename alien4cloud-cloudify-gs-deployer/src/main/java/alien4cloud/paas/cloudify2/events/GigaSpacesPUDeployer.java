@@ -68,7 +68,7 @@ public class GigaSpacesPUDeployer {
                 printUsage();
                 quitWithError("Option -" + PU_NAME_OPTION + " is mandatory : The path to the processing unit must be specified");
             } else {
-                // String puPath = "src/main/resources/alien4cloud-cloudify-events-rest.war";
+                // String puPath = "src/main/resources/alien4cloud-cloudify-events.war";
                 String puPath = cmd.getOptionValue(PU_NAME_OPTION);
                 processingUnit = new File(puPath);
                 if (!processingUnit.exists()) {
