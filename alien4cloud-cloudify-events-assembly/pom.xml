@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>alien4cloud</groupId>
 		<artifactId>alien4cloud-cloudify2-extension</artifactId>
-		<version>0.0.4</version>
+		<version>1.0.0-SM23</version>
 	</parent>
 
 	<artifactId>alien4cloud-cloudify-events-assembly</artifactId>
@@ -20,7 +20,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.4</version>
 				<configuration>
-					<finalName>alien4cloud-cloudify-events-rest</finalName>
+					<finalName>alien4cloud-cloudify-events</finalName>
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
 					</descriptors>
@@ -41,7 +41,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>alien4cloud</groupId>
-			<artifactId>alien4cloud-cloudify-events-rest</artifactId>
+			<artifactId>alien4cloud-cloudify-events</artifactId>
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>

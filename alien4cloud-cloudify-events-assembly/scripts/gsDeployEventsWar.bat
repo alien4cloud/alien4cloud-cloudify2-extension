@@ -18,6 +18,6 @@ echo Deploying custom events on locator(s) %LUS_IP_ADDRESS%
 
 set HOME=%~dp0..
 set CLASSPATH="%HOME%\lib\*"
-set ARGS=-name events -locators %LUS_IP_ADDRESS% -pu %HOME%\deploy\alien4cloud-cloudify-events-rest.war
+set ARGS=-name events -locators %LUS_IP_ADDRESS% -pu %HOME%\deploy\alien4cloud-cloudify-events.war
 
 %JAVACMD% -cp %CLASSPATH% alien4cloud.paas.cloudify2.events.GigaSpacesPUDeployer %ARGS%

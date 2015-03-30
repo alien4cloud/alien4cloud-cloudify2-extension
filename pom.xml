@@ -3,7 +3,7 @@
 
     <groupId>alien4cloud</groupId>
     <artifactId>alien4cloud-cloudify2-extension</artifactId>
-    <version>0.0.4</version>
+    <version>1.0.0-SM23</version>
 
     <packaging>pom</packaging>
 
@@ -13,7 +13,7 @@
     <modules>
         <module>alien4cloud-cloudify-events-model</module>
         <module>alien4cloud-cloudify-events-assembly</module>
-        <module>alien4cloud-cloudify-events-rest</module>
+        <module>alien4cloud-cloudify-events</module>
         <module>alien4cloud-cloudify-gs-deployer</module>
     </modules>
 

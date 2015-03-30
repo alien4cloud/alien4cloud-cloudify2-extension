@@ -18,8 +18,10 @@ public class RelationshipOperationEvent extends AlienEventDescription {
     private Boolean processed;
     private Boolean executed;
     private Boolean succeeded;
+    /* ip of the trigger member */
+    private String ipAddress;
 
     public String resume() {
-        return relationshipId.concat(".").concat(event).concat("(").concat(serviceName + "[" + instanceId + "]").concat(")");
+        return relationshipId.concat(".").concat(event).concat("(").concat(serviceName + "[" + instanceId + "][ip:: " + ipAddress + "]").concat(")");
     }
 }
