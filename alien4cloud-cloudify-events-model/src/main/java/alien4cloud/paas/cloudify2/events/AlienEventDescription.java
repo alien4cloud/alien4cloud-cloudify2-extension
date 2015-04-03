@@ -11,32 +11,25 @@ import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
 @Setter
+@Getter
 @NoArgsConstructor
 @ToString
 public abstract class AlienEventDescription {
 
     private String id;
-
     private Integer routing = 1;
-    
-    @Getter
-    protected Integer eventIndex;
-    @Getter
-    protected String applicationName;
-    @Getter
-    protected String serviceName;
-    @Getter
-    protected String instanceId;
-    @Getter
-    protected String deploymentId;
-    @Getter
-    protected Date dateTimestamp;
+    private Integer eventIndex;
+    private String applicationName;
+    private String serviceName;
+    private String instanceId;
+    private String deploymentId;
+    private Date dateTimestamp;
 
     @SpaceRouting
     public Integer getRouting() {
         return routing;
     }
-    
+
     @SpaceId(autoGenerate = true)
     private String getId() {
         return id;
