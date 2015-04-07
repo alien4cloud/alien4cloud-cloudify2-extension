@@ -53,8 +53,7 @@ public class CloudifyStateController {
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(String.format("Requesting getEventsSince(date=%s, maxEvents=%s)...", date, maxEvents));
         }
-        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class,
-                "dateTimestamp > ? ORDER BY applicationName, serviceName, dateTimestamp, eventIndex", date);
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, "dateTimestamp > ? ORDER BY dateTimestamp, eventIndex", date);
         return gigaSpace.readMultiple(template, maxEvents);
     }
 
