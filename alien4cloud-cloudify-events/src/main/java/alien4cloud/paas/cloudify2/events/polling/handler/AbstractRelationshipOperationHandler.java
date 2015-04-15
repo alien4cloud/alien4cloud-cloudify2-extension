@@ -24,6 +24,7 @@ import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
 import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
 import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
 import alien4cloud.paas.cloudify2.events.polling.RestClientManager;
+import alien4cloud.paas.cloudify2.rest.RestUtils;
 
 public abstract class AbstractRelationshipOperationHandler implements IEventHandler<RelationshipOperationEvent> {
 
