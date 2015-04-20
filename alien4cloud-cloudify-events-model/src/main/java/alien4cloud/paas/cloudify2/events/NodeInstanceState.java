@@ -12,7 +12,8 @@ import com.gigaspaces.annotation.pojo.SpaceRouting;
 @Setter
 @Getter
 public class NodeInstanceState {
-    private String topologyId;
+    private String applicationName;
+    private String deploymentId;
     private String nodeTemplateId;
     private String instanceId;
     private String instanceState;
@@ -20,10 +21,10 @@ public class NodeInstanceState {
     @SpaceRouting
     @SpaceId(autoGenerate = false)
     public String getId() {
-        if (topologyId == null || nodeTemplateId == null || instanceId == null) {
+        if (deploymentId == null || nodeTemplateId == null || instanceId == null) {
             return null;
         }
-        return topologyId + "-" + nodeTemplateId + "-" + instanceId;
+        return deploymentId + "-" + nodeTemplateId + "-" + instanceId;
     }
 
     public void setId(String id) {
