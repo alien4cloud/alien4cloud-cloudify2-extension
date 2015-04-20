@@ -1,6 +1,7 @@
-package alien4cloud.paas.cloudify2.events.polling.handler;
+package alien4cloud.paas.cloudify2.rest;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -11,6 +12,8 @@ public final class RestUtils {
     private static final String INVOCATION_SUCCESS_KEY = "Invocation_Success";
     private static final String INVOCATION_SUCCESS = "SUCCESS";
     private static final String INVOCATION_EXCEPTION_KEY = "Invocation_Exception";
+
+    private static final Logger log = Logger.getLogger(RestUtils.class.getName());
 
     /**
      * Parse the response of a custom command invocation on a service level
@@ -43,6 +46,7 @@ public final class RestUtils {
         if (INVOCATION_SUCCESS.equals(invocationResult.get(INVOCATION_SUCCESS_KEY))) {
             successes.put(invocationResult.get(INVOCATION_INSTANCE_ID_KEY), invocationResult.get(INVOCATION_RESULT_KEY));
         } else {
+            log.warning(invocationResult.toString());
             failures.put(invocationResult.get(INVOCATION_INSTANCE_ID_KEY), invocationResult.get(INVOCATION_EXCEPTION_KEY));
         }
 

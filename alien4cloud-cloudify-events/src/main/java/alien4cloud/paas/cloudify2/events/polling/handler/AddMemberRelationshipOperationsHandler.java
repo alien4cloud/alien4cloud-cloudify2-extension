@@ -30,20 +30,20 @@ public class AddMemberRelationshipOperationsHandler extends AbstractRelationship
     @Override
     protected boolean isConditionMetToProcessEvent(RelationshipOperationEvent event, RelationshipMember triggeredMember) {
         // wait for the triggered node to be at least started
-        return waitFor(event.getApplicationName(), triggeredMember.nodeId, triggeredMember.cdfyServiceName, "started", "available");
+        return waitFor(event.getDeploymentId(), triggeredMember.nodeId, triggeredMember.cdfyServiceName, "started", "available");
     }
 
     /**
      * wait for a service (node template) to reach a certain state
      *
-     * @param application
+     * @param deploymentId TODO
      * @param node
      * @param service
      * @param state
      */
-    protected boolean waitFor(String application, String node, String service, String... states) {
+    protected boolean waitFor(String deploymentId, String node, String service, String... states) {
         NodeInstanceState template = new NodeInstanceState();
-        template.setTopologyId(application);
+        template.setDeploymentId(deploymentId);
         template.setNodeTemplateId(node);
         Long timeout = System.currentTimeMillis() + DEFAULT_TIMEOUT_MILLIS;
         boolean continueToCheck = true;

@@ -22,6 +22,6 @@ public class RelationshipOperationEvent extends AlienEventDescription {
     private String ipAddress;
 
     public String resume() {
-        return relationshipId.concat(".").concat(event).concat("(").concat(serviceName + "[" + instanceId + "][ip:: " + ipAddress + "]").concat(")");
+        return relationshipId.concat(".").concat(event).concat("(").concat(getServiceName() + "[" + getInstanceId() + "][ip:: " + ipAddress + "]").concat(")");
     }
 }

@@ -24,6 +24,7 @@ import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
 import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
 import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
 import alien4cloud.paas.cloudify2.events.polling.RestClientManager;
+import alien4cloud.paas.cloudify2.rest.RestUtils;
 
 public abstract class AbstractRelationshipOperationHandler implements IEventHandler<RelationshipOperationEvent> {
 
@@ -68,7 +69,7 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             Map<String, String> success = new HashMap<String, String>();
             Map<String, String> failures = new HashMap<String, String>();
             RestUtils.parseServiceInvokeResponse(success, failures, invokeResponse.getInvocationResultPerInstance());
-            log.info("Command result: \n\tSUCCESS: " + success + "\n\tFAILLURES: " + failures);
+            log.info("Execution <" + event.resume() + "> result: \n\tSUCCESS: " + success + "\n\tFAILLURES: " + failures);
             if (failures.isEmpty()) {
                 event.setSucceeded(true);
             } else {

@@ -23,6 +23,8 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 public class GigaSpacesPUDeployer {
 
     private static final String CONTEXT_PROPERTY_APPLICATION_NAME = "com.gs.application";
+    private static final String CDFY_USERNAME = "cdfy.username";
+    private static final String CDFY_PASSWORD = "cdfy.password";
     private static final String DEFAULT_LOCATORS = "localhost:4174";
     private static final String DEFAULT_ZONE = "events";
 
@@ -32,18 +34,24 @@ public class GigaSpacesPUDeployer {
     private static final String LOCATORS_OPTION = "locators";
     private static final String PU_NAME_OPTION = "pu";
     private static final String DEPLOYMENT_NAME_OPTION = "name";
+    private static final String CDFY_USERNAME_OPTION = "username";
+    private static final String CDFY_PASSWORD_OPTION = "password";
 
     static {
         COMMAND_LINE_OPTIONS.addOption(HELP_OPTION, false, "Print help");
         COMMAND_LINE_OPTIONS.addOption(DEPLOYMENT_NAME_OPTION, true, "The deployment name");
         COMMAND_LINE_OPTIONS.addOption(LOCATORS_OPTION, true, "GigaSpaces locators");
         COMMAND_LINE_OPTIONS.addOption(PU_NAME_OPTION, true, "Path to the process unit to deploy");
+        COMMAND_LINE_OPTIONS.addOption(CDFY_USERNAME_OPTION, true, "Username to usr for cloudify connexion");
+        COMMAND_LINE_OPTIONS.addOption(CDFY_PASSWORD_OPTION, true, "Password to usr for cloudify connexion");
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
         String name = null;
         String locators = null;
         File processingUnit = null;
+        String userneme = null;
+        String password = null;
 
         CommandLineParser cmdLineParser = new PosixParser();
         try {
@@ -78,21 +86,19 @@ public class GigaSpacesPUDeployer {
                 }
             }
 
+            userneme = cmd.getOptionValue(CDFY_USERNAME_OPTION);
+            password = cmd.getOptionValue(CDFY_PASSWORD_OPTION);
+
         } catch (ParseException e) {
             quitWithError(e);
         }
 
-        deploy(name, locators, processingUnit);
+        deploy(name, locators, processingUnit, userneme, password);
     }
 
     private static void quitWithError(String message) {
         System.err.println(message);
         System.exit(1);
-    }
-
-    private static void quitWithWarning(String message) {
-        System.out.println("WARNING: \t " + message);
-        System.exit(0);
     }
 
     private static void quitWithError(Exception e) {
@@ -104,7 +110,8 @@ public class GigaSpacesPUDeployer {
         formatter.printHelp("gsDeploy [-h] [-locators {host:port,host:port,..}] [-pu path_to_the_pu_file]", COMMAND_LINE_OPTIONS);
     }
 
-    private static void deploy(String name, String locators, File processingUnit) throws InterruptedException, IOException {
+    private static void deploy(String name, String locators, File processingUnit, String cdfyUsername, String cdfyPassword) throws InterruptedException,
+            IOException {
         AdminFactory adminFactory = new AdminFactory();
         adminFactory.useGsLogging(false);
         adminFactory.addLocators(locators);
@@ -124,7 +131,8 @@ public class GigaSpacesPUDeployer {
             GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
             for (GridServiceAgent gsa : agents) {
                 if (!gsa.getMachine().getGridServiceManagers().isEmpty()) {
-                    startEventGSC(gsa);
+                    startEventGSC(gsa, cdfyUsername, cdfyPassword);
+                    // startEventGSC(gsa, "TOTO", "TATA");
                 }
             }
 
@@ -151,7 +159,7 @@ public class GigaSpacesPUDeployer {
         }
     }
 
-    private static void startEventGSC(GridServiceAgent agent) throws IOException {
+    private static void startEventGSC(GridServiceAgent agent, String cdfyUsername, String cdfyPassword) throws IOException {
         if (isLocalAgent(agent.getMachine().getHostAddress())) {
             System.out.println("Start a GSC for events on <" + agent.getMachine().getHostAddress() + ">");
             GridServiceContainerOptions options = new GridServiceContainerOptions();
@@ -159,20 +167,25 @@ public class GigaSpacesPUDeployer {
             options.vmInputArgument("-Xms128m");
             options.vmInputArgument("-Dcom.gs.zones=" + DEFAULT_ZONE);
             options.vmInputArgument("-Dcom.gs.transport_protocol.lrmi.bind-port=7010-7110");
+            if (cdfyUsername != null) {
+                options.vmInputArgument("-D" + CDFY_USERNAME + "=" + cdfyUsername);
+            }
+            if (cdfyPassword != null) {
+                options.vmInputArgument("-D" + CDFY_PASSWORD + "=" + cdfyPassword);
+            }
             agent.startGridService(options);
         }
     }
 
     private static boolean isLocalAgent(String agentIp) throws IOException {
-        Enumeration e = NetworkInterface.getNetworkInterfaces();
+        Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
         while (e.hasMoreElements()) {
             NetworkInterface n = (NetworkInterface) e.nextElement();
-            Enumeration ee = n.getInetAddresses();
+            Enumeration<InetAddress> ee = n.getInetAddresses();
             while (ee.hasMoreElements()) {
                 InetAddress i = (InetAddress) ee.nextElement();
                 System.out.println("is agent <" + agentIp + "> on <" + i.getHostAddress() + ">");
                 if (i.getHostAddress().equals(agentIp)) {
-                    System.out.println("YES");
                     return true;
                 }
             }

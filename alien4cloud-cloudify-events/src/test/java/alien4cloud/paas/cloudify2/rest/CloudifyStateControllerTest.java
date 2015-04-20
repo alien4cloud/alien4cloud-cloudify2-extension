@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -17,13 +18,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import alien4cloud.paas.cloudify2.events.AlienEvent;
-import alien4cloud.paas.cloudify2.rest.CloudifyStateController;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:test-context.xml")
 public class CloudifyStateControllerTest {
 
     private static final String APPLI_NAME = "applicationName";
+    private static final String DEPLOYMENT_ID = UUID.randomUUID().toString();
     private static final String SERVICE_NAME = "serviceName";
     private static final String INSTANCE_ID = "1";
 
@@ -42,6 +43,7 @@ public class CloudifyStateControllerTest {
         for (String event : events) {
             AlienEvent entry = new AlienEvent();
             entry.setApplicationName(APPLI_NAME);
+            entry.setDeploymentId(DEPLOYMENT_ID);
             entry.setEvent(event);
             entry.setServiceName(SERVICE_NAME);
             entry.setInstanceId(INSTANCE_ID);
@@ -79,22 +81,22 @@ public class CloudifyStateControllerTest {
     @Test
     public void testGetEvents() throws Exception {
         // Test request with all parameters
-        this.doTestGetEvents(APPLI_NAME, SERVICE_NAME, INSTANCE_ID, 0, Arrays.asList("PRE_SERVICE_START", "PRE_INSTALL", "INSTALL", "POST_INSTALL"));
+        this.doTestGetEvents(DEPLOYMENT_ID, SERVICE_NAME, INSTANCE_ID, 0, Arrays.asList("PRE_SERVICE_START", "PRE_INSTALL", "INSTALL", "POST_INSTALL"));
 
         // Test request without specify the service
-        this.doTestGetEvents(APPLI_NAME, null, INSTANCE_ID, 0, Arrays.asList("PRE_SERVICE_START", "PRE_INSTALL", "INSTALL", "POST_INSTALL"));
+        this.doTestGetEvents(DEPLOYMENT_ID, null, INSTANCE_ID, 0, Arrays.asList("PRE_SERVICE_START", "PRE_INSTALL", "INSTALL", "POST_INSTALL"));
 
         // Test request with an eventIndex
-        this.doTestGetEvents(APPLI_NAME, SERVICE_NAME, INSTANCE_ID, 3, Arrays.asList("INSTALL", "POST_INSTALL"));
+        this.doTestGetEvents(DEPLOYMENT_ID, SERVICE_NAME, INSTANCE_ID, 3, Arrays.asList("INSTALL", "POST_INSTALL"));
 
         // Test request with an eventIndex without specifying the service
-        this.doTestGetEvents(APPLI_NAME, null, INSTANCE_ID, 3, Arrays.asList("INSTALL", "POST_INSTALL"));
+        this.doTestGetEvents(DEPLOYMENT_ID, null, INSTANCE_ID, 3, Arrays.asList("INSTALL", "POST_INSTALL"));
 
         // Test request with a wrong application name
         this.doTestGetEvents("unknownAppli", null, INSTANCE_ID, 0, null);
 
         // Test request with a wrong service name
-        this.doTestGetEvents(APPLI_NAME, "unknownService", INSTANCE_ID, 0, null);
+        this.doTestGetEvents(DEPLOYMENT_ID, "unknownService", INSTANCE_ID, 0, null);
     }
 
     private void doTestGetEvents(String appliName, String serviceName, String instanceId, int index, List<String> expectedEvents) {

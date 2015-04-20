@@ -7,10 +7,13 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,22 +56,22 @@ public class CloudifyStateController {
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(String.format("Requesting getEventsSince(date=%s, maxEvents=%s)...", date, maxEvents));
         }
-        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, "dateTimestamp > ?", date);
+        SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, "dateTimestamp > ? ORDER BY dateTimestamp, eventIndex", date);
         return gigaSpace.readMultiple(template, maxEvents);
     }
 
     @RequestMapping(value = "/getEvents", method = RequestMethod.GET)
     @ResponseBody
-    public AlienEvent[] getEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
+    public AlienEvent[] getEvents(@RequestParam(required = true) String deploymentId, @RequestParam(required = false) String service,
             @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
 
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting getEvents(application=%s, service=%s, instanceId=%s, lastIndex=%s)...", application, service, instanceId,
+            LOGGER.finest(String.format("Requesting getEvents(deploymentId=%s, service=%s, instanceId=%s, lastIndex=%s)...", deploymentId, service, instanceId,
                     lastIndex));
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("applicationName='").append(application).append("'");
+        sb.append("deploymentId='").append(deploymentId).append("'");
         if (StringUtils.isNotEmpty(service)) {
             sb.append(" and serviceName='").append(service).append("'");
         }
@@ -89,24 +92,25 @@ public class CloudifyStateController {
     @RequestMapping(value = "/getInstanceStates", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public NodeInstanceState[] getInstanceStates(@RequestParam(required = true) String application) {
+    public NodeInstanceState[] getInstanceStates(@RequestParam(required = true) String deploymentId) {
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting getInstanceStates(application=%s)...", application));
+            LOGGER.finest(String.format("Requesting getInstanceStates(deploymentId=%s)...", deploymentId));
         }
         NodeInstanceState template = new NodeInstanceState();
-        template.setTopologyId(application);
+        template.setDeploymentId(deploymentId);
         return gigaSpace.readMultiple(template);
     }
 
     @RequestMapping(value = "/deleteInstanceStates", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String deleteInstanceStates(@RequestParam(required = true) String application) {
+    public String deleteInstanceStates(@RequestParam(required = true) String deploymentId) {
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting deleteInstanceStates(application=%s)...", application));
+            LOGGER.finest(String.format("Requesting deleteInstanceStates(deploymentId=%s)...", deploymentId));
         }
         NodeInstanceState template = new NodeInstanceState();
-        template.setTopologyId(application);
+        template.setDeploymentId(deploymentId);
+        ;
         gigaSpace.clear(template);
         return "ok";
     }
@@ -126,15 +130,16 @@ public class CloudifyStateController {
     @RequestMapping(value = "/deleteAllEvents", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String deleteAllEvents(@RequestParam(required = true) String application) {
+    public String deleteAllEvents(@RequestParam(required = true) String deploymentId) {
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("RequestingdeleteAllEvents(application=%s)...", application));
+            LOGGER.finest(String.format("RequestingdeleteAllEvents(deploymentId=%s)...", deploymentId));
         }
         AlienEvent template = new AlienEvent();
-        template.setApplicationName(application);
+        template.setDeploymentId(deploymentId);
+        ;
         gigaSpace.clear(template);
         RelationshipOperationEvent template2 = new RelationshipOperationEvent();
-        template2.setApplicationName(application);
+        template2.setDeploymentId(deploymentId);
         gigaSpace.clear(template2);
         return "ok";
     }
@@ -142,15 +147,15 @@ public class CloudifyStateController {
     @RequestMapping(value = "/getLatestEvent", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AlienEvent getLatestEvent(@RequestParam(required = true) String application, @RequestParam(required = true) String service,
+    public AlienEvent getLatestEvent(@RequestParam(required = true) String deploymentId, @RequestParam(required = true) String service,
             @RequestParam(required = true) String instanceId) {
 
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Requesting getLatestEvent(application=%s, service=%s, instanceId=%s)...", application, service, instanceId));
+            LOGGER.finest(String.format("Requesting getLatestEvent(deploymentId=%s, service=%s, instanceId=%s)...", deploymentId, service, instanceId));
         }
 
         SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, String.format(
-                "applicationName='%s' and serviceName='%s' and instanceId='%s' ORDER BY eventIndex DESC", application, service, instanceId));
+                "deploymentId='%s' and serviceName='%s' and instanceId='%s' ORDER BY eventIndex DESC", deploymentId, service, instanceId));
         AlienEvent[] readMultiple = gigaSpace.readMultiple(template, 1);
 
         if (readMultiple != null && readMultiple.length > 0) {
@@ -187,14 +192,14 @@ public class CloudifyStateController {
 
     @RequestMapping(value = "/getRelEvents", method = RequestMethod.GET)
     @ResponseBody
-    public RelationshipOperationEvent[] getRelEvents(@RequestParam(required = true) String application, @RequestParam(required = false) String service,
+    public RelationshipOperationEvent[] getRelEvents(@RequestParam(required = true) String deploymentId, @RequestParam(required = false) String service,
             @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
 
-        LOGGER.info(String.format("Requesting getEvents(application=%s, service=%s, instanceId=%s, lastIndex=%s)...", application, service, instanceId,
+        LOGGER.info(String.format("Requesting getEvents(deploymentId=%s, service=%s, instanceId=%s, lastIndex=%s)...", deploymentId, service, instanceId,
                 lastIndex));
 
         StringBuilder sb = new StringBuilder();
-        sb.append("applicationName='").append(application).append("'");
+        sb.append("deploymentId='").append(deploymentId).append("'");
         if (StringUtils.isNotEmpty(service)) {
             sb.append(" and serviceName='").append(service).append("'");
         }
@@ -210,5 +215,13 @@ public class CloudifyStateController {
 
         SQLQuery<RelationshipOperationEvent> template = new SQLQuery<RelationshipOperationEvent>(RelationshipOperationEvent.class, sb.toString());
         return gigaSpace.readMultiple(template);
+    }
+
+    @RequestMapping(value = "/putInstanceStates", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void putNodeInstanceState(@RequestBody NodeInstanceState[] nodeInstanceState) {
+        if (ArrayUtils.isNotEmpty(nodeInstanceState)) {
+            gigaSpace.writeMultiple(nodeInstanceState);
+        }
     }
 }
