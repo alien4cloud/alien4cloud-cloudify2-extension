@@ -34,10 +34,10 @@ public class RemoveMemberRelationshipOperationsHandler extends AbstractRelations
         RestClient restClient = restClientManager.getRestClient();
         String mainMemberServiceName = triggeredMember.cdfyServiceName.equals(event.getSourceService()) ? event.getTargetService() : event.getServiceName();
         ServiceDescription mainServiceDescription = restClient.getServiceDescription(event.getApplicationName(), mainMemberServiceName);
-        boolean isNotUndeploying = !mainServiceDescription.getServiceState().equals(DeploymentState.IN_PROGRESS);
-        if (!isNotUndeploying) {
+        boolean isUndeploying = mainServiceDescription.getServiceState().equals(DeploymentState.IN_PROGRESS);
+        if (isUndeploying) {
             log.info("Service " + mainMemberServiceName + " is in undeployment state... We do not invoque remove_target/remove_node in this case.");
         }
-        return isNotUndeploying;
+        return !isUndeploying;
     }
 }

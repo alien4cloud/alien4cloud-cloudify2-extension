@@ -92,7 +92,6 @@ public class GigaSpacesPUDeployer {
         } catch (ParseException e) {
             quitWithError(e);
         }
-
         deploy(name, locators, processingUnit, userneme, password);
     }
 
@@ -168,10 +167,10 @@ public class GigaSpacesPUDeployer {
             options.vmInputArgument("-Dcom.gs.zones=" + DEFAULT_ZONE);
             options.vmInputArgument("-Dcom.gs.transport_protocol.lrmi.bind-port=7010-7110");
             if (cdfyUsername != null) {
-                options.vmInputArgument("-D" + CDFY_USERNAME + "=" + cdfyUsername);
+                options.vmInputArgument("-D" + CDFY_USERNAME + "=" + cdfyUsername.trim());
             }
             if (cdfyPassword != null) {
-                options.vmInputArgument("-D" + CDFY_PASSWORD + "=" + cdfyPassword);
+                options.vmInputArgument("-D" + CDFY_PASSWORD + "=" + cdfyPassword.trim());
             }
             agent.startGridService(options);
         }
@@ -184,7 +183,7 @@ public class GigaSpacesPUDeployer {
             Enumeration<InetAddress> ee = n.getInetAddresses();
             while (ee.hasMoreElements()) {
                 InetAddress i = (InetAddress) ee.nextElement();
-                System.out.println("is agent <" + agentIp + "> on <" + i.getHostAddress() + ">");
+                // System.out.println("is agent <" + agentIp + "> on <" + i.getHostAddress() + ">");
                 if (i.getHostAddress().equals(agentIp)) {
                     return true;
                 }
