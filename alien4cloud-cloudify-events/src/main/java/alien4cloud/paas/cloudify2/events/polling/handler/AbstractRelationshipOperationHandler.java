@@ -80,7 +80,7 @@ public abstract class AbstractRelationshipOperationHandler implements IEventHand
             }
         } catch (RestClientException e) {
             event.setSucceeded(false);
-            log.severe("Fail to handle event " + event + ". \n\t" + e.getMessageFormattedText());
+            log.severe("Fail to handle event " + event + ". \n\t==>" + e.getMessageFormattedText() + "\n");
         }
 
     }

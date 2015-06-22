@@ -60,7 +60,6 @@ public class AddMemberRelationshipOperationsHandler extends AbstractRelationship
             }
 
             if (continueToCheck) {
-                log.info("Waiting 1000millis for node <" + node + ">  to reach one of the states <" + ArrayUtils.toString(states) + ">...");
                 try {
                     Thread.sleep(1000L);
                 } catch (InterruptedException e) {
