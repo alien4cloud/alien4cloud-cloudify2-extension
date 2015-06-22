@@ -169,8 +169,9 @@ public class CloudifyStateController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public AlienEvent[] getAllEvents() {
-
-        LOGGER.info("Requesting getAllEvents()...");
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest("Requesting getAllEvents()...");
+        }
 
         SQLQuery<AlienEvent> template = new SQLQuery<AlienEvent>(AlienEvent.class, String.format("ORDER BY dateTimestamp, eventIndex"));
         AlienEvent[] read = gigaSpace.readMultiple(template);
@@ -182,7 +183,9 @@ public class CloudifyStateController {
     @ResponseBody
     public RelationshipOperationEvent[] getAllRelationshipEvents() {
 
-        LOGGER.info("Requesting getAllRelationsihpEvents()...");
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest("Requesting getAllRelationsihpEvents()...");
+        }
 
         SQLQuery<RelationshipOperationEvent> template = new SQLQuery<RelationshipOperationEvent>(RelationshipOperationEvent.class,
                 String.format("ORDER BY dateTimestamp, eventIndex"));
@@ -195,8 +198,10 @@ public class CloudifyStateController {
     public RelationshipOperationEvent[] getRelEvents(@RequestParam(required = true) String deploymentId, @RequestParam(required = false) String service,
             @RequestParam(required = false) String instanceId, @RequestParam(required = false) Integer lastIndex) {
 
-        LOGGER.info(String.format("Requesting getEvents(deploymentId=%s, service=%s, instanceId=%s, lastIndex=%s)...", deploymentId, service, instanceId,
-                lastIndex));
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(String.format("Requesting getRelEvents(deploymentId=%s, service=%s, instanceId=%s, lastIndex=%s)...", deploymentId, service,
+                    instanceId, lastIndex));
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("deploymentId='").append(deploymentId).append("'");

@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cloudifysource.restclient.RestClient;
 import org.cloudifysource.restclient.exceptions.RestClientException;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,9 @@ public class RestClientManager {
         if (restClient == null) {
             try {
                 restClient = new RestClient(new URL(url), username, password, version);
+                if (StringUtils.isNoneBlank(username, password)) {
+                    restClient.connect();
+                }
             } catch (RestClientException e) {
                 String msg = "Fail to create a Cloudify Rest Client. \n" + e.getMessageFormattedText();
                 log.severe(msg);
