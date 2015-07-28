@@ -31,5 +31,18 @@
             <artifactId>gs-openspaces</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- cloudify -->
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>dsl</artifactId>
+            <version>${cloudify.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>rest-client</artifactId>
+            <version>${cloudify.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
