@@ -16,30 +16,14 @@ package alien4cloud.paas.cloudify2.rest.external;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.cloudifysource.dsl.internal.CloudifyConstants;
 import org.cloudifysource.dsl.internal.CloudifyErrorMessages;
 import org.cloudifysource.dsl.internal.ProcessorTypes;
@@ -123,12 +107,17 @@ public class RestClient {
     protected String shutdownManagersControllerUrl;
 
     public RestClient(final URL url, final String username, final String password, final String apiVersion) throws RestClientException {
+        this(url, username, password, apiVersion, HttpClientFactory.createHttpClient(url));
+    }
+
+    public RestClient(final URL url, final String username, final String password, final String apiVersion, final DefaultHttpClient httpClient)
+            throws RestClientException {
 
         versionedDeploymentControllerUrl = apiVersion + DEPLOYMENT_CONTROLLER_URL;
         versionedUploadControllerUrl = apiVersion + UPLOAD_CONTROLLER_URL;
         versionedTemplatesControllerUrl = apiVersion + TEMPLATES_CONTROLLER_URL;
         shutdownManagersControllerUrl = apiVersion + SHUTDOWN_MANAGERS_CONTROLLER_URL;
-        this.executor = createExecutor(url, apiVersion);
+        this.executor = createExecutor(url, httpClient);
 
         setCredentials(username, password);
     }
@@ -505,86 +494,8 @@ public class RestClient {
         }
     }
 
-    private RestClientExecutor createExecutor(final URL url, final String apiVersion) throws RestClientException {
-        SystemDefaultHttpClient httpClient;
-        if (HTTPS.equals(url.getProtocol())) {
-            httpClient = getSSLHttpClient(url);
-        } else {
-            httpClient = new SystemDefaultHttpClient();
-        }
-        final HttpParams httpParams = httpClient.getParams();
-
-        HttpConnectionParams.setConnectionTimeout(httpParams, CloudifyConstants.DEFAULT_HTTP_CONNECTION_TIMEOUT);
-        int socketTimeout = getSocketTimeout();
-        logger.fine("setting rest client socket timeout to: " + socketTimeout);
-        HttpConnectionParams.setSoTimeout(httpParams, socketTimeout);
+    private RestClientExecutor createExecutor(final URL url, DefaultHttpClient httpClient) throws RestClientException {
         return new RestClientExecutor(httpClient, url);
-    }
-
-    /**
-     * Returns a HTTP client configured to use SSL.
-     *
-     * @param url
-     *
-     * @return HTTP client configured to use SSL
-     * @throws org.cloudifysource.restclient.exceptions.RestClientException
-     *             Reporting different failures while creating the HTTP client
-     */
-    private SystemDefaultHttpClient getSSLHttpClient(final URL url) throws RestClientException {
-        try {
-            final X509TrustManager trustManager = createTrustManager();
-            final SSLContext ctx = SSLContext.getInstance("TLS");
-            ctx.init(null, new TrustManager[] { trustManager }, null);
-            final SSLSocketFactory ssf = new SSLSocketFactory(ctx, createHostnameVerifier());
-            final AbstractHttpClient base = new SystemDefaultHttpClient();
-            SystemDefaultHttpClient httpClient = new SystemDefaultHttpClient(base.getParams());
-            httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme(HTTPS, url.getPort(), ssf));
-            return httpClient;
-        } catch (final Exception e) {
-            throw new RestClientException(FAILED_CREATING_CLIENT, "Failed creating http client", ExceptionUtils.getFullStackTrace(e));
-        }
-    }
-
-    private X509TrustManager createTrustManager() {
-        final X509TrustManager tm = new X509TrustManager() {
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            @Override
-            public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-            }
-
-            @Override
-            public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-            }
-        };
-        return tm;
-    }
-
-    private X509HostnameVerifier createHostnameVerifier() {
-        final X509HostnameVerifier verifier = new X509HostnameVerifier() {
-
-            @Override
-            public boolean verify(final String arg0, final SSLSession arg1) {
-                return true;
-            }
-
-            @Override
-            public void verify(final String host, final String[] cns, final String[] subjectAlts) throws SSLException {
-            }
-
-            @Override
-            public void verify(final String host, final X509Certificate cert) throws SSLException {
-            }
-
-            @Override
-            public void verify(final String host, final SSLSocket ssl) throws IOException {
-            }
-        };
-        return verifier;
     }
 
     /**
@@ -811,7 +722,7 @@ public class RestClient {
         return restClientSocketTimeout;
     }
 
-    public void shutDown() {
-        this.executor.shutDown();
+    public void shutdown() {
+        this.executor.shutdown();
     }
 }
