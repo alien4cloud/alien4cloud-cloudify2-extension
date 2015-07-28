@@ -12,11 +12,11 @@ import lombok.SneakyThrows;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cloudifysource.restclient.RestClient;
 import org.cloudifysource.restclient.exceptions.RestClientException;
 import org.springframework.stereotype.Component;
 
 import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
+import alien4cloud.paas.cloudify2.rest.external.RestClient;
 
 @Setter
 @Getter

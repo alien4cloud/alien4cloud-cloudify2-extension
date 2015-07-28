@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 
 import org.cloudifysource.dsl.rest.request.InvokeCustomCommandRequest;
 import org.cloudifysource.dsl.rest.response.InvokeServiceCommandResponse;
-import org.cloudifysource.restclient.RestClient;
 import org.cloudifysource.restclient.exceptions.RestClientException;
 import org.openspaces.core.GigaSpace;
 
@@ -25,6 +24,7 @@ import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
 import alien4cloud.paas.cloudify2.events.Execption.RestEventException;
 import alien4cloud.paas.cloudify2.events.polling.RestClientManager;
 import alien4cloud.paas.cloudify2.rest.RestUtils;
+import alien4cloud.paas.cloudify2.rest.external.RestClient;
 
 public abstract class AbstractRelationshipOperationHandler implements IEventHandler<RelationshipOperationEvent> {
 
