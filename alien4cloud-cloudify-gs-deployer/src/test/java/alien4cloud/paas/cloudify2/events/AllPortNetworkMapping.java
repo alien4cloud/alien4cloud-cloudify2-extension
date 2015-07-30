@@ -3,9 +3,6 @@ package alien4cloud.paas.cloudify2.events;
 import com.gigaspaces.lrmi.INetworkMapper;
 import com.gigaspaces.lrmi.ServerAddress;
 
-/**
- * @author Minh Khang VU
- */
 public class AllPortNetworkMapping implements INetworkMapper {
 
     @Override
