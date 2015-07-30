@@ -14,9 +14,11 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.zone.Zone;
 
 public class GigaSpacesPUDeployer {
 
@@ -107,15 +109,12 @@ public class GigaSpacesPUDeployer {
         formatter.printHelp("gsDeploy [-h] [-locators {host:port,host:port,..}] [-pu path_to_the_pu_file]", COMMAND_LINE_OPTIONS);
     }
 
-    public static void deploy(Admin admin, String name, File processingUnit, String cdfyUsername, String cdfyPassword)
-            throws InterruptedException,
-            IOException {
+    public static void deploy(Admin admin, String name, File processingUnit, String cdfyUsername, String cdfyPassword) throws InterruptedException, IOException {
         long timeout = 30L;
         // Wait for at least 1 manager in order to be able to query for processing unit
         GridServiceManager gsm = admin.getGridServiceManagers().waitForAtLeastOne(timeout, TimeUnit.MINUTES);
         if (gsm == null) {
-            System.out.println("ERROR: \t Could not get GSM for deployment after " + timeout + " minutes");
-            return;
+            quitWithError("ERROR: \t Could not get GSM for deployment after " + timeout + " minutes");
         }
         if (isDeployed(admin, name)) {
             System.out.println("INFO: \t PU " + name + " already deployed. Skipping...");
@@ -124,26 +123,29 @@ public class GigaSpacesPUDeployer {
         // Wait for management space PU
         ProcessingUnit cloudifyManagementSpacePU = admin.getProcessingUnits().waitFor("cloudifyManagementSpace", timeout, TimeUnit.MINUTES);
         if (cloudifyManagementSpacePU == null) {
-            System.out.println("ERROR: \t Could not retrieve cloudifyManagementSpace PU after " + timeout + " minutes");
-            return;
+            quitWithError("ERROR: \t Could not retrieve cloudifyManagementSpace PU after " + timeout + " minutes");
         }
         int plannedInstancesNumberOfEventsPU = cloudifyManagementSpacePU.getPlannedNumberOfInstances();
         // Wait for the same number of agent as the planned number of instances
         if (!admin.getGridServiceAgents().waitFor(plannedInstancesNumberOfEventsPU, timeout, TimeUnit.MINUTES)) {
             System.out.println("ERROR: \t Could not have " + plannedInstancesNumberOfEventsPU + " GSAs after " + timeout + " minutes");
         }
+        Zone zone = admin.getZones().waitFor(DEFAULT_ZONE, 5, TimeUnit.SECONDS);
+        if (zone != null && zone.getGridServiceContainers().waitFor(1, 5, TimeUnit.SECONDS)) {
+            zone.getGridServiceContainers().waitFor(plannedInstancesNumberOfEventsPU, 5, TimeUnit.SECONDS);
+            for (GridServiceContainer container : zone.getGridServiceContainers().getContainers()) {
+                container.kill();
+            }
+        }
         GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
         for (GridServiceAgent gsa : agents) {
             startEventGSC(gsa, cdfyUsername, cdfyPassword);
         }
-
         ProcessingUnitDeployment deployment = new ProcessingUnitDeployment(processingUnit);
         deployment.name(name);
         deployment.setContextProperty(CONTEXT_PROPERTY_APPLICATION_NAME, "management");
         deployment.addZone(DEFAULT_ZONE);
         deployment.numberOfInstances(plannedInstancesNumberOfEventsPU);
-        deployment.numberOfBackups(0);
-        deployment.clusterSchema(null);
         gsm.deploy(deployment);
     }
 
