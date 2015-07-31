@@ -2,6 +2,9 @@ package alien4cloud.paas.cloudify2.events;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -111,6 +114,22 @@ public class GigaSpacesPUDeployer {
         formatter.printHelp("gsDeploy [-h] [-locators {host:port,host:port,..}] [-pu path_to_the_pu_file]", COMMAND_LINE_OPTIONS);
     }
 
+    private static boolean isLocalAgent(String agentIp) throws IOException {
+        Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+        while (e.hasMoreElements()) {
+            NetworkInterface n = (NetworkInterface) e.nextElement();
+            Enumeration<InetAddress> ee = n.getInetAddresses();
+            while (ee.hasMoreElements()) {
+                InetAddress i = (InetAddress) ee.nextElement();
+                // System.out.println("is agent <" + agentIp + "> on <" + i.getHostAddress() + ">");
+                if (i.getHostAddress().equals(agentIp)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static int getPlannedNumberOfInstances(Admin admin) {
         // Wait for management space PU
         ProcessingUnit cloudifyManagementSpacePU = admin.getProcessingUnits().waitFor("cloudifyManagementSpace", TIME_OUT, TIME_UNIT);
@@ -120,24 +139,30 @@ public class GigaSpacesPUDeployer {
         return cloudifyManagementSpacePU.getPlannedNumberOfInstances();
     }
 
-    public static void deploy(Admin admin, String name, File processingUnit, String cdfyUsername, String cdfyPassword) throws InterruptedException, IOException {
-        // Wait for at least 1 manager in order to be able to query for processing unit
-        GridServiceManager gsm = admin.getGridServiceManagers().waitForAtLeastOne(TIME_OUT, TIME_UNIT);
-        if (gsm == null) {
-            quitWithError("ERROR: \t Could not get GSM for deployment after " + TIME_OUT + " " + TIME_UNIT);
-        }
-        if (isDeployed(admin, name)) {
-            System.out.println("INFO: \t PU " + name + " already deployed. Skipping...");
-            return;
-        }
-        int plannedInstancesNumberOfEventsPU = getPlannedNumberOfInstances(admin);
+    private static void ensureGSCsForEventPU(Admin admin, int plannedInstancesNumberOfEventsPU, String cdfyUsername, String cdfyPassword) throws IOException {
         // Wait for the same number of agent as the planned number of instances
         if (!admin.getGridServiceAgents().waitFor(plannedInstancesNumberOfEventsPU, TIME_OUT, TIME_UNIT)) {
             System.out.println("ERROR: \t Could not have " + plannedInstancesNumberOfEventsPU + " GSAs after " + TIME_OUT + " " + TIME_UNIT);
         }
         GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
         for (GridServiceAgent gsa : agents) {
-            startEventGSC(gsa, cdfyUsername, cdfyPassword);
+            if (isLocalAgent(gsa.getMachine().getHostAddress())) {
+                startEventGSC(gsa, cdfyUsername, cdfyPassword);
+            }
+        }
+    }
+
+    public static void deploy(Admin admin, String name, File processingUnit, String cdfyUsername, String cdfyPassword) throws InterruptedException, IOException {
+        // Wait for at least 1 manager in order to be able to query for processing unit
+        GridServiceManager gsm = admin.getGridServiceManagers().waitForAtLeastOne(TIME_OUT, TIME_UNIT);
+        if (gsm == null) {
+            quitWithError("ERROR: \t Could not get GSM for deployment after " + TIME_OUT + " " + TIME_UNIT);
+        }
+        int plannedInstancesNumberOfEventsPU = getPlannedNumberOfInstances(admin);
+        ensureGSCsForEventPU(admin, plannedInstancesNumberOfEventsPU, cdfyUsername, cdfyPassword);
+        if (isDeployed(admin, name)) {
+            System.out.println("INFO: \t PU " + name + " already deployed. Skipping...");
+            return;
         }
         ProcessingUnitDeployment deployment = new ProcessingUnitDeployment(processingUnit);
         deployment.name(name);
