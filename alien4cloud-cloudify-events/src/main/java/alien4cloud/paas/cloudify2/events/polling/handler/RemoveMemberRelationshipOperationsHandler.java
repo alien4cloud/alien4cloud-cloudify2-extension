@@ -2,13 +2,13 @@ package alien4cloud.paas.cloudify2.events.polling.handler;
 
 import org.cloudifysource.dsl.internal.CloudifyConstants.DeploymentState;
 import org.cloudifysource.dsl.rest.response.ServiceDescription;
-import org.cloudifysource.restclient.RestClient;
 import org.cloudifysource.restclient.exceptions.RestClientException;
 import org.springframework.stereotype.Component;
 
 import alien4cloud.paas.cloudify2.events.RelationshipOperationEvent;
 import alien4cloud.paas.cloudify2.events.RelationshipOperationsContants;
 import alien4cloud.paas.cloudify2.events.Execption.EventHandlingException;
+import alien4cloud.paas.cloudify2.rest.external.RestClient;
 
 @Component
 public class RemoveMemberRelationshipOperationsHandler extends AbstractRelationshipOperationHandler {

@@ -3,7 +3,7 @@
     <parent>
         <groupId>alien4cloud</groupId>
         <artifactId>alien4cloud-cloudify2-extension</artifactId>
-        <version>1.1.0-SM1</version>
+        <version>1.1.0-SM2</version>
     </parent>
     <artifactId>alien4cloud-cloudify-events-model</artifactId>
 
@@ -29,6 +29,19 @@
         <dependency>
             <groupId>com.gigaspaces</groupId>
             <artifactId>gs-openspaces</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- cloudify -->
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>dsl</artifactId>
+            <version>${cloudify.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cloudifysource</groupId>
+            <artifactId>rest-client</artifactId>
+            <version>${cloudify.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
