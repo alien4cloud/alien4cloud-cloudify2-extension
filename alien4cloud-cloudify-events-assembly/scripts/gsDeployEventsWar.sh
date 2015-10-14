@@ -2,7 +2,7 @@
 
 if [ -z "${JAVA_HOME}" ]; then
     # echo "The JAVA_HOME environment variable is not set. Using the java that is set in system path."
-  JAVACMD=java
+  JAVACMD=~/java/bin/java
 else
     # echo JAVA_HOME environment variable is set to ${JAVA_HOME} in "<GigaSpaces Root>\bin\setenv.sh"
   JAVACMD="${JAVA_HOME}/bin/java"
